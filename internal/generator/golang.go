@@ -100,10 +100,10 @@ func GenerateGolang(model *models.DataModel, outputDir string) ([]string, error)
 // convertObjectToGoStruct converts a CWMP object to a Golang struct
 func convertObjectToGoStruct(obj models.Object) GoObject {
 	goObj := GoObject{
-		Name:        obj.Name,
-		GoName:      toExportedName(sanitize(obj.Name)),
-		Description: obj.Description,
-		Parameters:  []GoParameter{},
+		Name:         obj.Name,
+		GoName:       toExportedName(sanitize(obj.Name)),
+		Description:  obj.Description,
+		Parameters:   []GoParameter{},
 		ChildObjects: []GoChildObject{},
 	}
 
@@ -121,10 +121,16 @@ func convertObjectToGoStruct(obj models.Object) GoObject {
 
 	// Handle nested objects
 	for _, childObj := range obj.Objects {
+		var goType string
+		if childObj.MultiInstance {
+			goType = "[]" + toExportedName(sanitize(childObj.Name))
+		} else {
+			goType = toExportedName(sanitize(childObj.Name))
+		}
 		childGoObj := GoChildObject{
 			Name:   childObj.Name,
 			GoName: toExportedName(sanitize(childObj.Name)),
-			GoType: childObj.MultiInstance ? "[]" + toExportedName(sanitize(childObj.Name)) : toExportedName(sanitize(childObj.Name)),
+			GoType: goType,
 			GoTags: fmt.Sprintf("`xml:\"%s,omitempty\"`", childObj.Name),
 		}
 		goObj.ChildObjects = append(goObj.ChildObjects, childGoObj)

@@ -15,3 +15,25 @@ A CLI tool that converts CWMP (CPE WAN Management Protocol) data models from XML
 
 ```bash
 go install github.com/Niceblueman/cwmp-codegen/cmd/cwmp-codegen@latest
+```
+
+To run the tests:
+bash
+```bash
+go test ./...
+```
+To run benchmarks:
+bash
+```bash
+go test -bench=. ./...
+```
+To build the project:
+bash
+```bash
+make build
+```
+To create a release with cross-platform binaries:
+bash
+```bash
+make release
+```
