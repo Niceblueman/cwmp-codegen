@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model name="Device" version="1.0">
+  <description>A sample CWMP device model</description>
+  <object name="Device" access="readOnly">
+    <description>Device information</description>
+    <parameter name="Manufacturer" access="readOnly" type="string">
+      <description>The manufacturer of the device</description>
+    </parameter>
+    <parameter name="ModelName" access="readOnly" type="string">
+      <description>The model name of the device</description>
+    </parameter>
+    <parameter name="SerialNumber" access="readOnly" type="string">
+      <description>The serial number of the device</description>
+    </parameter>
+    <object name="NetworkInterface" multiInstance="true">
+      <description>Network interface information</description>
+      <parameter name="Enable" access="readWrite" type="boolean">
+        <description>Enables or disables this interface</description>
+      </parameter>
+      <parameter name="Status" access="readOnly" type="string">
+        <description>The status of this interface</description>
+        <syntax>
+          <enum>
+            <value>Up</value>
+            <value>Down</value>
+            <value>Unknown</value>
+            <value>Dormant</value>
+            <value>NotPresent</value>
+            <value>LowerLayerDown</value>
+            <value>Error</value>
+          </enum>
+        </syntax>
+      </parameter>
+      <parameter name="MACAddress" access="readOnly" type="string">
+        <description>The MAC address of this interface</description>
+      </parameter>
+    </object>
+  </object>
+</model>

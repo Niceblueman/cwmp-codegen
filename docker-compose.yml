@@ -1,0 +1,11 @@
+version: '3'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./input:/root/input
+      - ./output:/root/output
+    command: --input=/root/input/model.xml --output=/root/output --lang=golang
