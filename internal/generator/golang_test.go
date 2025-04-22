@@ -44,17 +44,25 @@ func TestGenerateGolang(t *testing.T) {
 		t.Fatalf("GenerateGolang returned error: %v", err)
 	}
 
-	// Check that we got the expected file
-	if len(files) != 1 {
-		t.Fatalf("Expected 1 file, got %d", len(files))
+	// Check that we got the expected files (common_types.go + one per message)
+	expectedFileCount := 1 + len(model.Objects) // common_types.go + one file per object
+	if len(files) != expectedFileCount {
+		t.Fatalf("Expected %d files, got %d", expectedFileCount, len(files))
 	}
 
-	if files[0] != "testmodel.go" {
-		t.Errorf("Expected filename 'testmodel.go', got '%s'", files[0])
+	// Verify common_types.go was generated
+	if !contains(files, "common_types.go") {
+		t.Errorf("Expected file 'common_types.go' not found in generated files")
 	}
 
-	// Read the generated file
-	content, err := os.ReadFile(filepath.Join(tmpDir, files[0]))
+	// Verify TestObject.go was generated
+	messageFile := "TestObject.go"
+	if !contains(files, messageFile) {
+		t.Errorf("Expected file '%s' not found in generated files", messageFile)
+	}
+
+	// Read the generated message file
+	content, err := os.ReadFile(filepath.Join(tmpDir, messageFile))
 	if err != nil {
 		t.Fatalf("Failed to read generated file: %v", err)
 	}
@@ -63,13 +71,34 @@ func TestGenerateGolang(t *testing.T) {
 	contentStr := string(content)
 
 	// Check for package declaration
-	if !strings.Contains(contentStr, "package testmodel") {
+	if !strings.Contains(contentStr, "package messages") {
 		t.Error("Generated code doesn't contain expected package declaration")
 	}
 
 	// Check for struct declaration
 	if !strings.Contains(contentStr, "type TestObject struct {") {
 		t.Error("Generated code doesn't contain expected struct declaration")
+	}
+
+	// Check for method declarations
+	if !strings.Contains(contentStr, "func NewTestObject()") {
+		t.Error("Generated code doesn't contain expected constructor")
+	}
+
+	if !strings.Contains(contentStr, "func (msg *TestObject) GetID()") {
+		t.Error("Generated code doesn't contain expected GetID method")
+	}
+
+	if !strings.Contains(contentStr, "func (msg *TestObject) GetName()") {
+		t.Error("Generated code doesn't contain expected GetName method")
+	}
+
+	if !strings.Contains(contentStr, "func (msg *TestObject) CreateXML()") {
+		t.Error("Generated code doesn't contain expected CreateXML method")
+	}
+
+	if !strings.Contains(contentStr, "func (msg *TestObject) Parse(") {
+		t.Error("Generated code doesn't contain expected Parse method")
 	}
 
 	// Check for field declarations
@@ -79,6 +108,21 @@ func TestGenerateGolang(t *testing.T) {
 
 	if !strings.Contains(contentStr, "NumberParam int") {
 		t.Error("Generated code doesn't contain expected int field")
+	}
+
+	// Read common_types.go
+	commonContent, err := os.ReadFile(filepath.Join(tmpDir, "common_types.go"))
+	if err != nil {
+		t.Fatalf("Failed to read common_types.go: %v", err)
+	}
+
+	commonStr := string(commonContent)
+	if !strings.Contains(commonStr, "type Message interface") {
+		t.Error("common_types.go doesn't contain Message interface")
+	}
+
+	if !strings.Contains(commonStr, "type Envelope struct") {
+		t.Error("common_types.go doesn't contain Envelope struct")
 	}
 }
 
@@ -122,4 +166,14 @@ func TestConvertObjectToGoStruct(t *testing.T) {
 	if goStruct.Parameters[1].GoType != "bool" {
 		t.Errorf("Expected parameter 1 type 'bool', got '%s'", goStruct.Parameters[1].GoType)
 	}
+}
+
+// Helper function to check if a slice contains a string
+func contains(slice []string, str string) bool {
+	for _, item := range slice {
+		if item == str {
+			return true
+		}
+	}
+	return false
 }

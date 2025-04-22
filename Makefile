@@ -31,7 +31,10 @@ clean:
 	rm -f $(BINARY_NAME)
 	rm -f $(BINARY_UNIX)
 	rm -f coverage.out
-
+dev:
+	$(GOCMD) run $(MAIN_PATH) $(ARGS)
+tr069-test:
+	$(GOCMD) run $(MAIN_PATH) -input https://raw.githubusercontent.com/BroadbandForum/cwmp-data-models/refs/heads/master/tr-069-1-0-0-full.xml -output output/tr069
 run:
 	$(GOBUILD) -o $(BINARY_NAME) -v $(MAIN_PATH)
 	./$(BINARY_NAME)

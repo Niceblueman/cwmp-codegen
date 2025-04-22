@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/Niceblueman/cwmp-codegen/internal/generator"
 	"github.com/Niceblueman/cwmp-codegen/internal/parser"
@@ -13,7 +14,6 @@ import (
 func main() {
 	// Define command-line flags
 	inputFile := flag.String("input", "", "Path to the XML model file (required)")
-	outputLang := flag.String("lang", "golang", "Output language (golang, typescript, cheader)")
 	outputDir := flag.String("output", "./output", "Directory for generated files")
 
 	// Parse flags
@@ -24,6 +24,11 @@ func main() {
 		fmt.Println("Error: input file is required")
 		flag.Usage()
 		os.Exit(1)
+	}
+
+	// Fix output directory name if it has .go suffix (tr069.go -> tr069)
+	if strings.HasSuffix(*outputDir, ".go") {
+		*outputDir = strings.TrimSuffix(*outputDir, ".go")
 	}
 
 	// Create output directory if it doesn't exist
@@ -40,25 +45,11 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Generate code based on the selected language
-	fmt.Printf("Generating %s code...\n", *outputLang)
-	var genErr error
-	var outputFiles []string
-
-	switch *outputLang {
-	case "golang":
-		outputFiles, genErr = generator.GenerateGolang(model, *outputDir)
-	case "typescript":
-		outputFiles, genErr = generator.GenerateTypeScript(model, *outputDir)
-	case "cheader":
-		outputFiles, genErr = generator.GenerateCHeader(model, *outputDir)
-	default:
-		fmt.Printf("Unsupported language: %s. Defaulting to golang.\n", *outputLang)
-		outputFiles, genErr = generator.GenerateGolang(model, *outputDir)
-	}
-
-	if genErr != nil {
-		fmt.Printf("Error generating code: %v\n", genErr)
+	// Generate Golang code
+	fmt.Println("Generating Golang code...")
+	outputFiles, err := generator.GenerateGolang(model, *outputDir)
+	if err != nil {
+		fmt.Printf("Error generating code: %v\n", err)
 		os.Exit(1)
 	}
 
